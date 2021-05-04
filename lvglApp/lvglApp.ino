@@ -28,7 +28,6 @@ void my_disp_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color
   lv_disp_flush_ready(disp); /* tell lvgl that flushing is done */
 }
 
-
 /* Interrupt driven periodic handler */
 static void lv_tick_handler(void)
 {
@@ -36,31 +35,44 @@ static void lv_tick_handler(void)
   lv_tick_inc(LVGL_TICK_PERIOD);
 }
 
+static const char *on = "ON";
+static const char *off = "OFF";
+
+void eventHandler(lv_obj_t *obj, lv_event_t event);
+
 class App {
   public:
-    App() {
+ App() : _isOn(false) {
       _root = lv_win_create(lv_scr_act(), NULL);
       lv_win_set_title(_root, "Window");
-      _label = lv_label_create(lv_scr_act(), NULL);
 
-      lv_style_init(&_largeStyle);
-      lv_style_set_text_font(&_largeStyle, LV_STATE_DEFAULT, lv_theme_get_font_title());
+      _button = lv_btn_create(lv_scr_act(), NULL);
+      lv_obj_set_event_cb(_button, eventHandler);
+      lv_obj_align(_button, NULL, LV_ALIGN_CENTER, 0, -40);
+      lv_btn_set_checkable(_button, true);
 
-      lv_obj_add_style(_label, LV_LABEL_PART_MAIN, &_largeStyle);
-      lv_obj_set_x(_label, 115);
-      lv_obj_set_y(_label, 10);
-      lv_obj_set_height(_label, 20);
-      lv_obj_set_width(_label, 50);
-      lv_label_set_text(_label, "Label, not ladle");
+      _label = lv_label_create(_button, NULL);
+      lv_label_set_text(_label, getText());
     }
 
-    lv_style_t _largeStyle;
+    const char *getText() {
+      _isOn = !_isOn;
+      return _isOn ? on : off;
+    }
+    
+    bool _isOn;
     lv_obj_t *_root;
     lv_obj_t *_label;
+    lv_obj_t *_button;
 };
 
-
 App *app;
+
+void eventHandler(lv_obj_t *obj, lv_event_t event) {
+  lv_label_set_text(app->_label,app->getText());
+}
+
+
 
 void setup() {
   lv_init();
@@ -90,7 +102,6 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-  lv_tick_handler();
   lv_task_handler(); /* let the GUI do its work */
   delay(LVGL_TICK_PERIOD);
 }
