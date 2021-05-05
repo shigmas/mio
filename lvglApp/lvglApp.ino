@@ -1,6 +1,8 @@
 #include <lvgl.h>
 #include <TFT_eSPI.h>
 
+#include "App.h"
+
 TFT_eSPI tft = TFT_eSPI(); /* TFT instance */
 static lv_disp_buf_t disp_buf;
 static lv_color_t buf[LV_HOR_RES_MAX * 10];
@@ -35,46 +37,16 @@ static void lv_tick_handler(void)
   lv_tick_inc(LVGL_TICK_PERIOD);
 }
 
-static const char *on = "ON";
-static const char *off = "OFF";
-
-void eventHandler(lv_obj_t *obj, lv_event_t event);
-
-class App {
-  public:
- App() : _isOn(false) {
-      _root = lv_win_create(lv_scr_act(), NULL);
-      lv_win_set_title(_root, "Window");
-
-      _button = lv_btn_create(lv_scr_act(), NULL);
-      lv_obj_set_event_cb(_button, eventHandler);
-      lv_obj_align(_button, NULL, LV_ALIGN_CENTER, 0, -40);
-      lv_btn_set_checkable(_button, true);
-
-      _label = lv_label_create(_button, NULL);
-      lv_label_set_text(_label, getText());
-    }
-
-    const char *getText() {
-      _isOn = !_isOn;
-      return _isOn ? on : off;
-    }
-    
-    bool _isOn;
-    lv_obj_t *_root;
-    lv_obj_t *_label;
-    lv_obj_t *_button;
-};
-
 App *app;
 
-void eventHandler(lv_obj_t *obj, lv_event_t event) {
-  lv_label_set_text(app->_label,app->getText());
-}
-
-
-
 void setup() {
+  Serial.begin(115200);
+  pinMode(WIO_5S_UP, INPUT_PULLUP);
+  pinMode(WIO_5S_DOWN, INPUT_PULLUP);
+  pinMode(WIO_5S_LEFT, INPUT_PULLUP);
+  pinMode(WIO_5S_RIGHT, INPUT_PULLUP);
+  pinMode(WIO_5S_PRESS, INPUT_PULLUP);
+
   lv_init();
   tft.begin();
   tft.setRotation(3);
@@ -101,6 +73,22 @@ void setup() {
 }
 
 void loop() {
+  App::FivePointEvent event = App::ReleaseEvent;
+  if (digitalRead(WIO_5S_UP) == LOW) {
+    event = App::UpEvent;
+  } else if (digitalRead(WIO_5S_DOWN) == LOW) {
+    event = App::DownEvent;
+  }
+  else if (digitalRead(WIO_5S_LEFT) == LOW) {
+    event = App::LeftEvent;
+  }
+  else if (digitalRead(WIO_5S_RIGHT) == LOW) {
+    event = App::RightEvent;
+  }
+  else if (digitalRead(WIO_5S_PRESS) == LOW) {
+    event = App::PressEvent;
+  }
+  app->updateFivePoint(event);
   // put your main code here, to run repeatedly:
   lv_task_handler(); /* let the GUI do its work */
   delay(LVGL_TICK_PERIOD);
