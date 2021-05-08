@@ -2,6 +2,11 @@
 #define _App_
 #include <lvgl.h>
 
+#ifndef NULL
+// Remove warnings
+#define NULL 0
+#endif
+
 static const char *on = "ON";
 static const char *off = "OFF";
 
@@ -12,7 +17,7 @@ void log() {
 
 class App {
 public:
-    typedef enum FivePointEvent {
+    enum FivePointEvent {
         UpEvent = 0,
         DownEvent,
         LeftEvent,
@@ -32,7 +37,8 @@ public:
         _x(160),
         _pressed(false),
         _sensitivity(2),
-        _isOn(false) {
+        _isOn(false),
+        _cursorBytes(NULL) {
         _root = lv_win_create(lv_scr_act(), NULL);
         lv_win_set_title(_root, "Window");
 
@@ -50,6 +56,12 @@ public:
         _indev_reg = lv_indev_drv_register(&_indev_drv);
     }
 
+    virtual ~App() {
+        if (_cursorBytes != NULL) {
+            delete _cursorBytes;
+        }
+    }
+
     static void fivePointHandler(lv_indev_drv_t *drv, lv_indev_data_t *data) {
         App *app = GetInstance();
         data->point.x = app->_x;
@@ -61,6 +73,10 @@ public:
         lv_label_set_text(app->_label, app->getText());
     }
 
+    void setCursor(char *bytes, uint32_t size) {
+        memcpy(_cursorBytes, bytes, size);
+    }
+    
     void updateFivePoint(FivePointEvent fpEvent) {
         
         switch (fpEvent) {
@@ -103,7 +119,8 @@ public:
     lv_obj_t *_button;
     lv_indev_drv_t _indev_drv;
     lv_indev_t *_indev_reg;
- 
+
+    char *_cursorBytes;
 };
 
 #endif // _App_
