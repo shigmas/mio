@@ -54,6 +54,11 @@ public:
         lv_indev_drv_init(&_indev_drv);
         _indev_drv.type = LV_INDEV_TYPE_POINTER;
         _indev_reg = lv_indev_drv_register(&_indev_drv);
+
+        LV_IMG_DECLARE(imageFile);
+        lv_obj_t * cursor_obj =  lv_img_create(lv_scr_act(), NULL); /*Create an image object for the cursor */
+        lv_img_set_src(cursor_obj, &imageFile);     /*Set the image source*/
+        lv_indev_set_cursor(_indev_reg, cursor_obj);
     }
 
     virtual ~App() {
