@@ -3,6 +3,7 @@
 #include <Seeed_FS.h>
 #include <SD/Seeed_SD.h>
 
+
 #include "App.h"
 
 TFT_eSPI tft = TFT_eSPI(); /* TFT instance */
@@ -65,22 +66,22 @@ void setup() {
   app = new App();
 
   // SD card with our data
-  if (!SD.begin(SDCARD_SS_PIN, SDCARD_SPI)) {
-      Serial.println("SD Card initialization failed");
-  }
-  // load top.png for our pointer cursor
-  File fstream = SD.open("top.png", FILE_READ);
-  if (fstream) {
-    uint32_t fsize = fstream.size();
-    char buffer[fsize+1];
-    long bytesRead = fstream.read(buffer, fsize);
-    if (bytesRead != fsize) {
-      Serial.println("Could not properly read file");
-    } else {
-      app->setCursor(buffer, fsize+1);
-    }
+  /* if (!SD.begin(SDCARD_SS_PIN, SDCARD_SPI)) { */
+  /*     Serial.println("SD Card initialization failed"); */
+  /* } */
+  /* // load top.png for our pointer cursor */
+  /* File fstream = SD.open("top.png", FILE_READ); */
+  /* if (fstream) { */
+  /*   uint32_t fsize = fstream.size(); */
+  /*   char buffer[fsize+1]; */
+  /*   long bytesRead = fstream.read(buffer, fsize); */
+  /*   if (bytesRead != fsize) { */
+  /*     Serial.println("Could not properly read file"); */
+  /*   } else { */
+  /*     app->setCursor(buffer, fsize+1); */
+  /*   } */
     
-  }
+  /* } */
 }
 
 void loop() {

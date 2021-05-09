@@ -53,11 +53,12 @@ public:
         // WIO's "mouse" can be the little joystick
         lv_indev_drv_init(&_indev_drv);
         _indev_drv.type = LV_INDEV_TYPE_POINTER;
+        _indev_drv.read_cb = &fivePointHandler;
         _indev_reg = lv_indev_drv_register(&_indev_drv);
 
-        LV_IMG_DECLARE(imageFile);
+        //        LV_IMG_DECLARE(top);
         lv_obj_t * cursor_obj =  lv_img_create(lv_scr_act(), NULL); /*Create an image object for the cursor */
-        lv_img_set_src(cursor_obj, &imageFile);     /*Set the image source*/
+        lv_img_set_src(cursor_obj, "/top.png");     /*Set the image source*/
         lv_indev_set_cursor(_indev_reg, cursor_obj);
     }
 
@@ -67,10 +68,12 @@ public:
         }
     }
 
-    static void fivePointHandler(lv_indev_drv_t *drv, lv_indev_data_t *data) {
+    static bool fivePointHandler(lv_indev_drv_t *drv, lv_indev_data_t *data) {
+        Serial.println("fivePointCallback");
         App *app = GetInstance();
         data->point.x = app->_x;
         data->point.y = app->_y;
+        return false;
     }
 
     static void eventHandler(lv_obj_t *obj, lv_event_t event) {
@@ -83,7 +86,6 @@ public:
     }
     
     void updateFivePoint(FivePointEvent fpEvent) {
-        
         switch (fpEvent) {
         case UpEvent:
             _y += _sensitivity;
@@ -103,6 +105,10 @@ public:
         default:
             _pressed = false;
         }
+        const char *pressed = _pressed ? "Pressed" : "Not pressed";
+        char log[64];
+        snprintf(log, 64, "State: (%d, %d), %s", _x, _y, pressed);
+        Serial.println(log);
     }
 
     const char *getText() {
